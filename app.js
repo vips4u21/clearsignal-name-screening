@@ -19,40 +19,21 @@ function drawResults(){
 }
 async function screen(name){
   searchedName=name.trim(); if(!searchedName)return;
-  const remaining=6000-(Date.now()-lastSearchAt);
-  if(remaining>0){
-    $('#lowerGrid').hidden=true;$('#resultsSection').hidden=false;$('#resultTitle').innerHTML=`Results for <b>${esc(searchedName)}</b>`;
-    $('#resultList').innerHTML=`<div class="empty-state">Please wait ${Math.ceil(remaining/1000)} seconds before searching again. The news source limits request frequency.</div>`;
-    $('#resultCount').textContent='';$('#resultsSection').scrollIntoView({behavior:'smooth',block:'start'});return;
-  }
-  lastSearchAt=Date.now();
   $('#lowerGrid').hidden=true;$('#resultsSection').hidden=false;$('#resultTitle').innerHTML=`Results for <b>${esc(searchedName)}</b>`;
-  $('#summaryRow').innerHTML='<div class="summary-card"><span class="summary-icon">⌕</span><div><strong>…</strong><small>Searching</small></div></div><div class="summary-card"><span class="summary-icon">◷</span><div><strong>—</strong><small>Source</small></div></div><div class="summary-card"><span class="summary-icon">▤</span><div><strong>—</strong><small>Articles</small></div></div>';
-  $('#resultList').innerHTML='<div class="empty-state">Searching live news coverage…</div>';$('#resultCount').textContent='';
-  currentFilter='all';document.querySelectorAll('.filter-btn').forEach(b=>b.classList.toggle('selected',b.dataset.filter==='all'));
-  const safeName=searchedName.replace(/[^\p{L}\p{M}\p{N}\s.'’-]/gu,' ').replace(/\s+/g,' ').trim();
-  const riskTerms=['arrest','charged','convicted','fraud','bribery','corruption','money laundering','sanction','embezzlement','crime','criminal','investigation','prosecuted','lawsuit','misconduct','scandal','terrorism','trafficking','tax evasion'];
-  const query=`"${safeName}" (${riskTerms.join(' OR ')})`;
-  const countryCodes={'United States':'us','United Kingdom':'uk','India':'in','Singapore':'sn','United Arab Emirates':'ae'};
-  const country=countryCodes[$('#countryInput').value];
-  const params=new URLSearchParams({query:country?`${query} sourcecountry:${country}`:query,mode:'artlist',format:'json',maxrecords:'50',sort:'datedesc'});
-  try{
-    const controller=new AbortController();const timeout=setTimeout(()=>controller.abort(),20000);
-    let response, raw;
-    try{response=await fetch(`https://api.gdeltproject.org/api/v2/doc/doc?${params}`,{signal:controller.signal});raw=await response.text()}
-    finally{clearTimeout(timeout)}
-    let data;
-    try{data=JSON.parse(raw)}catch{
-      if(/please limit requests to one every 5 seconds/i.test(raw||''))throw new Error('GDELT is rate-limiting searches right now. Wait at least 6 seconds and try again.');
-      throw new Error('The news provider returned an unreadable response. Please try again shortly.');
-    }
-    if(!response.ok)throw new Error(data.error||`News provider returned status ${response.status}.`);
-    currentResults=(data.articles||[]).map(a=>({title:a.title||'Untitled article',url:/^https?:\/\//i.test(a.url||'')?a.url:'',source:a.domain||'News source',date:a.seendate||'',language:a.language||'',sourceCountry:a.sourcecountry||''}));
-    $('#summaryRow').innerHTML=`<div class="summary-card"><span class="summary-icon">↗</span><div><strong>${currentResults.length}</strong><small>Articles found</small></div></div><div class="summary-card"><span class="summary-icon">◎</span><div><strong>GDELT</strong><small>News source</small></div></div><div class="summary-card"><span class="summary-icon">◷</span><div><strong>Live</strong><small>Search run</small></div></div>`;
-    drawResults();
-    const index=recent.findIndex(r=>r.name.toLowerCase()===searchedName.toLowerCase());if(index>=0)recent.splice(index,1);
-    recent.unshift({name:searchedName,detail:$('#countryInput').value?`Name · ${$('#countryInput').value}`:'Name · All regions',status:`${currentResults.length} found`,time:'Just now',initial:searchedName.split(/\s+/).slice(0,2).map(x=>x[0]).join('').toUpperCase(),kind:currentResults.length?'review':'clear'});drawRecent();
-  }catch(error){currentResults=[];$('#summaryRow').innerHTML='<div class="summary-card"><span class="summary-icon">!</span><div><strong>Unavailable</strong><small>Search status</small></div></div>';$('[data-filter="all"]')?.classList.add('selected');$('#resultCount').textContent='';const message=error.name==='AbortError'?'The live search timed out. Check your internet connection and try again.':error instanceof TypeError?'Could not reach GDELT. Check your internet connection or try opening the app in a regular browser.':error.message;const fallback=`https://news.google.com/search?q=${encodeURIComponent(`"${searchedName}" (fraud OR corruption OR bribery OR arrest OR investigation)`)}&hl=en-IN&gl=IN&ceid=IN:en`;$('#resultList').innerHTML=`<div class="empty-state"><div>${esc(message)}</div><p style="margin:12px 0 8px">You can try the same name search on Google News. The name will be sent to Google if you open this link.</p><a class="review-button fallback-link" href="${esc(fallback)}" target="_blank" rel="noopener noreferrer">Search Google News&nbsp; ↗</a></div>`}
+  currentResults=[];currentFilter='all';
+  $('#resultsSection .result-toolbar .filters').hidden=true;
+  document.querySelectorAll('.filter-btn').forEach(b=>b.classList.toggle('selected',b.dataset.filter==='all'));
+  const adverseTerms='fraud OR corruption OR bribery OR arrest OR charged OR investigation OR money laundering OR sanction OR criminal OR embezzlement OR lawsuit OR misconduct OR trafficking OR tax evasion';
+  const query=`"${searchedName}" (${adverseTerms})`;
+  const regions={'United States':['en-US','US','US:en'],'United Kingdom':['en-GB','GB','GB:en'],'India':['en-IN','IN','IN:en'],'Singapore':['en-SG','SG','SG:en'],'United Arab Emirates':['en-AE','AE','AE:en']};
+  const [hl,gl,ceid]=regions[$('#countryInput').value]||['en-IN','IN','IN:en'];
+  const searchUrl=`https://news.google.com/search?q=${encodeURIComponent(query)}&hl=${hl}&gl=${gl}&ceid=${ceid}`;
+  window.open(searchUrl,'_blank','noopener,noreferrer');
+  $('#summaryRow').innerHTML='<div class="summary-card"><span class="summary-icon">↗</span><div><strong>Google News</strong><small>Live news search</small></div></div><div class="summary-card"><span class="summary-icon">◎</span><div><strong>New tab</strong><small>Results opened</small></div></div><div class="summary-card"><span class="summary-icon">◷</span><div><strong>Review</strong><small>Verify each match</small></div></div>';
+  $('#resultCount').textContent='Search results are provided by Google News.';
+  $('#resultList').innerHTML=`<div class="empty-state"><div>Your search opened in Google News. Review each result and confirm the person's identity and the original reporting.</div><p style="margin:12px 0 8px">Your name and adverse-news terms are sent to Google when you search.</p><a class="review-button fallback-link" href="${esc(searchUrl)}" target="_blank" rel="noopener noreferrer">Open Google News results&nbsp; ↗</a></div>`;
+  const index=recent.findIndex(r=>r.name.toLowerCase()===searchedName.toLowerCase());if(index>=0)recent.splice(index,1);
+  recent.unshift({name:searchedName,detail:$('#countryInput').value?`Google News · ${$('#countryInput').value}`:'Google News · India region',status:'Search opened',time:'Just now',initial:searchedName.split(/\s+/).slice(0,2).map(x=>x[0]).join('').toUpperCase(),kind:'review'});drawRecent();
   $('#resultsSection').scrollIntoView({behavior:'smooth',block:'start'});
 }
 $('#screenForm').addEventListener('submit',e=>{e.preventDefault();screen($('#nameInput').value)});
