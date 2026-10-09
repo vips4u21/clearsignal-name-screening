@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="theme-color" content="#f7f8fa" />
+  <title>ClearSignal — adverse media screening</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <aside class="sidebar">
+    <a class="brand" href="#"><span class="brand-mark">cs</span><span>clearsignal<span class="brand-dot">.</span></span></a>
+    <div class="workspace"><span class="workspace-icon">P</span><span><b>Personal compliance</b><small>Private workspace</small></span><span class="chevron">⌄</span></div>
+    <div class="nav-label">WORKSPACE</div>
+    <nav>
+      <a class="nav-item active" href="#screenForm"><span>◎</span>Screen a name</a>
+      <a class="nav-item" href="#recentList"><span>◷</span>Recent searches</a>
+      <a class="nav-item" href="#guideButton"><span>▤</span>Screening guide</a>
+    </nav>
+    <div class="nav-label second">PERSONAL WORKSPACE</div>
+    <div class="sidebar-bottom"><div class="help-circle">?</div><div><b>Need a hand?</b><small>Visit the help center</small></div><span class="arrow">↗</span></div>
+    <div class="user"><div class="avatar">P</div><div><b>Personal use</b><small>Searches stay in this session</small></div><span class="chevron">···</span></div>
+  </aside>
+
+  <main class="main">
+    <header class="topbar"><div class="crumb">Personal workspace <span>/</span> Adverse media</div><div class="top-actions"><div class="top-avatar">P</div></div></header>
+    <div class="content">
+      <section class="heading-row"><div><div class="eyebrow"><span class="live-dot"></span>SCREENING CENTER</div><h1>Adverse media</h1><p class="subtitle">Search live global news coverage for a name and review potential adverse mentions.</p></div><button class="button ghost" id="historyButton">↺ &nbsp; Screening history</button></section>
+
+      <section class="search-card">
+        <div class="search-intro"><div class="search-icon">⌕</div><div><h2>Screen a person or organization</h2><p>Search news and public sources for potential adverse information.</p></div></div>
+        <form id="screenForm" class="search-form">
+          <label class="field"><span>Full name or entity</span><div class="input-wrap"><span class="input-search">⌕</span><input id="nameInput" autocomplete="off" placeholder="e.g. Jordan Lee or Acme Holdings" required /><button type="button" class="clear-input" id="clearInput" aria-label="Clear">×</button></div></label>
+          <label class="field country-field"><span>Publisher country <small>Optional</small></span><select id="countryInput"><option value="">All countries</option><option>United States</option><option>United Kingdom</option><option>India</option><option>Singapore</option><option>United Arab Emirates</option></select></label>
+          <button class="button primary" type="submit"><span>⌕</span> Screen name</button>
+        </form>
+        <div class="search-foot"><span>↗ &nbsp; GDELT DOC live news · multilingual coverage · recent rolling window</span><span class="secure">♧ &nbsp; Search names are sent to GDELT</span></div>
+      </section>
+
+      <section class="results-section" id="resultsSection" hidden>
+        <div class="results-head"><div><div class="eyebrow result-eyebrow"><span class="live-dot"></span>SCREENING RESULTS</div><h2 id="resultTitle">Results for <b></b></h2></div><span class="demo-pill">LIVE SEARCH</span></div>
+        <div class="summary-row" id="summaryRow"></div>
+        <div class="result-toolbar"><span id="resultCount"></span><div class="filters"><button class="filter-btn selected" data-filter="all">All results</button><button class="filter-btn" data-filter="high">Risk term in headline</button><button class="filter-btn" data-filter="medium">Other matches</button><select id="sortSelect" aria-label="Sort results"><option value="relevance">Source order</option><option value="recent">Most recent</option></select></div></div>
+        <div class="result-list" id="resultList"></div>
+        <p class="disclaimer">A name and keyword match is not proof of identity or wrongdoing. News coverage may be incomplete, inaccurate or about another person. Verify each original source and apply human review before taking action. GDELT is a broad news search source, not a sanctions or watchlist screening service.</p>
+      </section>
+
+      <section class="lower-grid" id="lowerGrid">
+        <div class="panel recent-panel"><div class="panel-head"><div><div class="eyebrow">YOUR ACTIVITY</div><h3>Recent searches</h3></div><span class="recent-session-label">This session only</span></div><div class="recent-list" id="recentList"></div></div>
+        <div class="panel guide-panel"><div class="guide-art"><span class="art-ring ring-a"></span><span class="art-ring ring-b"></span><span class="art-core">✓</span><span class="art-spark">✦</span></div><div class="guide-copy"><div class="eyebrow">SCREEN WITH CONFIDENCE</div><h3>Make sense of your results</h3><p>Learn how relevance scores work and what to verify before escalating a match.</p><button class="text-button" id="guideButton">Read the screening guide <span>→</span></button></div></div>
+      </section>
+      <footer>ClearSignal <span>·</span> Personal screening tool <a href="privacy.html">Privacy</a><span class="footer-right">Verify all results with original sources</span></footer>
+    </div>
+  </main>
+  <div class="toast" id="toast" role="status"></div>
+  <script src="app.js"></script>
+</body>
+</html>
