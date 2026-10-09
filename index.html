@@ -37,7 +37,7 @@
           <label class="field country-field"><span>Publisher country <small>Optional</small></span><select id="countryInput"><option value="">All countries</option><option>United States</option><option>United Kingdom</option><option>India</option><option>Singapore</option><option>United Arab Emirates</option></select></label>
           <button class="button primary" type="submit"><span>⌕</span> Screen name</button>
         </form>
-        <div class="search-foot"><span>↗ &nbsp; Live adverse-news search · opens Google News in a new tab</span><span class="secure">♧ &nbsp; Search names are sent to Google</span></div>
+        <div class="search-foot"><span>↗ &nbsp; Live news search · matching articles and count appear here</span><span class="secure">♧ &nbsp; Search names go to the news sources</span></div>
       </section>
 
       <section class="results-section" id="resultsSection" hidden>
@@ -45,7 +45,7 @@
         <div class="summary-row" id="summaryRow"></div>
         <div class="result-toolbar"><span id="resultCount"></span><div class="filters"><button class="filter-btn selected" data-filter="all">All results</button><button class="filter-btn" data-filter="high">Risk term in headline</button><button class="filter-btn" data-filter="medium">Other matches</button><select id="sortSelect" aria-label="Sort results"><option value="relevance">Source order</option><option value="recent">Most recent</option></select></div></div>
         <div class="result-list" id="resultList"></div>
-        <p class="disclaimer">A name and keyword match is not proof of identity or wrongdoing. News coverage may be incomplete, inaccurate or about another person. Verify each original source and apply human review before taking action. Google News is a news search tool, not a sanctions or watchlist screening service.</p>
+        <p class="disclaimer">A name and keyword match is not proof of identity or wrongdoing. The count is articles returned by the selected news sources, not confirmed cases. News coverage may be incomplete, inaccurate or about another person. Verify each original source before taking action. This is not sanctions or watchlist screening.</p>
       </section>
 
       <section class="lower-grid" id="lowerGrid">
@@ -56,6 +56,6 @@
     </div>
   </main>
   <div class="toast" id="toast" role="status"></div>
-  <script src="app.js?v=google-news-1"></script>
+  <script src="app.js?v=screening-count-1"></script>
 </body>
 </html>
