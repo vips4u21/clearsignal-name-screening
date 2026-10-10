@@ -40,8 +40,8 @@ async function fetchText(url, timeoutMs, accept) {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), timeoutMs);
   try {
-    const response = await fetch(url, { signal: controller.signal, headers: { Accept: accept } });
-    if (!response.ok) throw new Error("News source returned " + response.status);
+    const response = await fetch(url, { signal: controller.signal, headers: { Accept: accept, "User-Agent": "Mozilla/5.0 (compatible; ClearSignal/1.0; personal screening)" } });
+    if (!response.ok) throw new Error("HTTP " + response.status);
     return await response.text();
   } finally { clearTimeout(timer); }
 }
@@ -55,23 +55,25 @@ export async function onRequestPost({ request }) {
   const query = '"' + name + '" (' + terms.join(" OR ") + ')';
   const googleUrl = new URL("https://news.google.com/rss/search");
   googleUrl.search = new URLSearchParams({ q: query, hl, gl, ceid });
+  let googleError;
   try {
     const xml = await fetchText(googleUrl, 8000, "application/rss+xml, application/xml, text/xml");
     return reply(parseGoogleNews(xml, country));
-  } catch {
-    const gdeltUrl = new URL("https://api.gdeltproject.org/api/v2/doc/doc");
-    gdeltUrl.search = new URLSearchParams({ query, mode: "artlist", format: "json", maxrecords: "50", sort: "datedesc" });
-    try {
-      const responseText = await fetchText(gdeltUrl, 7000, "application/json");
-      const data = JSON.parse(responseText);
-      if (!Array.isArray(data.articles)) throw new Error("Invalid GDELT response");
-      const articles = data.articles.filter(article => /^https?:\/\//i.test(article.url || "")).slice(0, 50).map(article => ({
-        title: article.title || "Untitled article", url: article.url, source: article.domain || "News source",
-        date: article.seendate || "", language: article.language || "News", sourceCountry: article.sourcecountry || "", description: ""
-      }));
-      return reply({ provider: "GDELT", count: articles.length, capped: articles.length >= 50, articles });
-    } catch {
-      return reply({ error: "News search is temporarily unavailable from Google News and GDELT. Please try again shortly." }, 502);
-    }
+  } catch (error) { googleError = error; }
+  const gdeltUrl = new URL("https://api.gdeltproject.org/api/v2/doc/doc");
+  gdeltUrl.search = new URLSearchParams({ query, mode: "artlist", format: "json", maxrecords: "50", sort: "datedesc" });
+  try {
+    const responseText = await fetchText(gdeltUrl, 7000, "application/json");
+    const data = JSON.parse(responseText);
+    if (!Array.isArray(data.articles)) throw new Error("Invalid response");
+    const articles = data.articles.filter(article => /^https?:\/\//i.test(article.url || "")).slice(0, 50).map(article => ({
+      title: article.title || "Untitled article", url: article.url, source: article.domain || "News source",
+      date: article.seendate || "", language: article.language || "News", sourceCountry: article.sourcecountry || "", description: ""
+    }));
+    return reply({ provider: "GDELT", count: articles.length, capped: articles.length >= 50, articles });
+  } catch (gdeltError) {
+    const first = googleError && googleError.name === "AbortError" ? "timeout" : (googleError && googleError.message || "unavailable");
+    const second = gdeltError && gdeltError.name === "AbortError" ? "timeout" : (gdeltError && gdeltError.message || "unavailable");
+    return reply({ error: "Search providers failed (Google News: " + first + "; GDELT: " + second + ")." }, 502);
   }
 }
