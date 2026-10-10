@@ -40,7 +40,7 @@ async function fetchText(url, timeoutMs, accept) {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), timeoutMs);
   try {
-    const response = await fetch(url, { signal: controller.signal, headers: { Accept: accept, "User-Agent": "Mozilla/5.0 (compatible; ClearSignal/1.0; personal screening)" } });
+    const response = await fetch(url, { signal: controller.signal, headers: { Accept: accept, "User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36" } });
     if (!response.ok) throw new Error("HTTP " + response.status);
     return await response.text();
   } finally { clearTimeout(timer); }
